@@ -5,7 +5,7 @@
 
 # Build dependencies
 dist.do
-dist
+# dist
 node_modules
 
 # Environment (contains sensitive data)
