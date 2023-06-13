@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
-import { dataSourceOptions } from './db/data-source';
+// import { dataSourceOptions } from './db/data-source';
+import { SharedModule } from '@app/shared';
+import { PostgresDBModule } from '@app/shared/postgresdb.module';
 
 @Module({
   imports: [
@@ -20,24 +22,27 @@ import { dataSourceOptions } from './db/data-source';
       envFilePath: './.env',
     }),
 
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      // useFactory: (configService: ConfigService) => ({
-      //   type: 'postgres',
-      //   url: configService.get('POSTGRES_URI'),
-      //   autoLoadEntities: true,
-      //   synchronize: true, // shouldn't be used in production may lose data
-      //   // entities: [UserEntity],
-      // }),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    // useFactory: (configService: ConfigService) => ({
+    //   type: 'postgres',
+    //   url: configService.get('POSTGRES_URI'),
+    //   autoLoadEntities: true,
+    //   synchronize: true, // shouldn't be used in production may lose data
+    //   // entities: [UserEntity],
+    // }),
 
-      useFactory: () => ({
-        ...dataSourceOptions,
-        autoLoadEntities: true,
-        synchronize: true, // shouldn't be used in production may lose data
-      }),
+    //   useFactory: () => ({
+    //     ...dataSourceOptions,
+    //     autoLoadEntities: true,
+    //     synchronize: true, // shouldn't be used in production may lose data
+    //   }),
 
-      inject: [ConfigService],
-    }),
+    //   inject: [ConfigService],
+    // }),
+
+    SharedModule,
+    PostgresDBModule,
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [AuthController],
