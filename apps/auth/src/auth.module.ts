@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
 // import { dataSourceOptions } from './db/data-source';
-import { SharedModule } from '@app/shared';
-import { PostgresDBModule } from '@app/shared/postgresdb.module';
+import {
+  PostgresDBModule,
+  SharedModule,
+  SharedService,
+  UserEntity,
+  UsersRepository,
+} from '@app/shared';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtGuard } from './jwt.guard';
+import { JwtStrategy } from './jwt-strategy';
 
 @Module({
   imports: [
@@ -22,30 +29,37 @@ import { PostgresDBModule } from '@app/shared/postgresdb.module';
       envFilePath: './.env',
     }),
 
-    // TypeOrmModule.forRootAsync({
-    //   imports: [ConfigModule],
-    // useFactory: (configService: ConfigService) => ({
-    //   type: 'postgres',
-    //   url: configService.get('POSTGRES_URI'),
-    //   autoLoadEntities: true,
-    //   synchronize: true, // shouldn't be used in production may lose data
-    //   // entities: [UserEntity],
-    // }),
-
-    //   useFactory: () => ({
-    //     ...dataSourceOptions,
-    //     autoLoadEntities: true,
-    //     synchronize: true, // shouldn't be used in production may lose data
-    //   }),
-
-    //   inject: [ConfigService],
-    // }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '3600s', // 1 hour in seconds
+        },
+      }),
+      inject: [ConfigService],
+    }),
 
     SharedModule,
     PostgresDBModule,
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    JwtGuard,
+    JwtStrategy,
+    {
+      provide: 'AuthServiceInterface',
+      useClass: AuthService,
+    },
+    {
+      provide: 'UsersRepositoryInterface',
+      useClass: UsersRepository,
+    },
+    {
+      provide: 'SharedServiceInterface',
+      useClass: SharedService,
+    },
+  ],
 })
 export class AuthModule {}

@@ -16,7 +16,7 @@ services:
     build:
       context: ./
       dockerfile: ./apps/auth/Dockerfile
-      target: development
+      # target: development
     env_file:
       - .env
     depends_on:
@@ -31,7 +31,7 @@ services:
     build:
       context: ./
       dockerfile: ./apps/presence/Dockerfile
-      target: development
+      # target: development
     env_file:
       - .env
     depends_on:
@@ -46,7 +46,7 @@ services:
     build:
       context: ./
       dockerfile: ./apps/api/Dockerfile
-      target: development
+      # target: development
     ports:
       - '4000:5000'
     env_file:
@@ -69,11 +69,11 @@ services:
     volumes:
       - ./db/data:/var/lib/postgresql/data
 
-  postgres_admin:
-    image: dpage/pgadmin4
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    ports:
-      - '15432:80'
+  # postgres_admin:
+  #   image: dpage/pgadmin4
+  #   depends_on:
+  #     - postgres
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - '15432:80'
